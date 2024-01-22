@@ -1,0 +1,96 @@
+
+/*This functions  primary purpose is to check
+the amount of characters in any given files lines.
+If any of these lines exceed 80 characters then 
+they will be marked with an X in an ouput file.
+*/
+#include <stdio.h>
+int main(void) {
+  
+  int counter = 0;
+  int tabC = 0;
+  char c = 'z';
+  char arr[9999];
+  int i = 0;
+  int first = 0;
+  int more_than_80 = 0;
+  int num_of_lines = 0;
+
+  /*These loops are for going through a line and then
+    looping over all the rest of the lines.*/
+  while (scanf("%c",&c)!=EOF) {
+    while (c != '\n') {
+      if (first == 0) {
+	arr[counter] = c;
+	counter++;
+	tabC++;
+	first++;
+      	if (c == '\t') {
+	  int temp = tabC++;
+	  int diff = 0;
+	  while (temp % 8 != 0) {
+	    temp++;
+	  }
+	  diff = temp - tabC;
+	  tabC = diff + tabC;
+	}
+      }
+      
+	scanf("%c", &c);
+	arr[counter] = c;
+	counter++;
+	tabC++;
+	/*This small if statement is to determine the length of the tab*/
+	if (c == '\t') {
+	  int temp = tabC++;
+	  int diff = 0;
+	  while (temp % 8 != 0) {
+	    temp++;
+	  }
+	  diff = temp - tabC;
+	  tabC = diff + tabC;
+	}
+      }
+
+      tabC--;
+      /*This is for checkline the length of lines and how
+       they should be printed.*/
+      if (tabC > 88) {
+	more_than_80++;
+	printf("X ");
+	printf("%4d", tabC);
+	printf("> ");
+      }
+    
+      if (tabC < 88) {
+	printf("  ");
+	if (tabC < 0) {
+	  tabC = 0;
+	}
+	printf("%4d", tabC);
+	printf("> ");
+      }
+      /*This is for printing the lines back out*/
+      for (i = 0; i < counter - 1; i++) {
+	printf("%c", arr[i]);
+      }
+      /*This is to reset the variable before iterating over another line
+       as well as adding a number to a line*/
+      num_of_lines++;
+      counter = 0;
+      tabC = 0;
+      first = 0;
+      c = 'z';
+      /*This is for cleaning out the array list*/
+      for (i = 0 ; i < 10000; i++) {
+	arr[i] = ' ';
+      }
+      printf("\n");
+  }
+  /*This is for the last lines that are counted.*/
+  printf("%d", num_of_lines);
+  printf(" ");
+  printf("%d", more_than_80);
+  printf("\n");
+  return 0;
+}

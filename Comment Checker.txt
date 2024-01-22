@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <err.h>
+#include <sysexits.h>
+#include "safe-fork.h"
+
+This program is simple. It checks to see if the number of arguments is valid.
+Then it forks the program and changes the standart input and output for
+the parent and the child using dup2. Then the child executes the program
+and pipes the output to the parent which does the calculation.
+*/
+
+int main(int argc, char *argv[]){
+  pid_t pid;
+  int pipefd[2];
+  double ans;
+  int first;
+  int second;
+  int numCom;
+  if(argc==1){
+    printf("Missing argument!\n");
+    exit(1);
+  }
+  if(argc>2){
+    printf("Too many arguments!\n");
+    exit(2);
+  }
+  first= 0;
+  second= 0;
+  ans = 0;
+  numCom=0;
+
+  assert(pipe(pipefd) == 0);
+  pid= safe_fork();
+  
+  if(pid>0){ /* parent */
+    assert(dup2(pipefd[0], STDIN_FILENO) != -1);
+    assert(scanf("%d", &first) != -1);
+    assert(scanf("%d", &second) != -1);
+    numCom = first-second;
+    ans = ((double)numCom/(double)first);
+    
+    if(ans>=.25){
+      printf("Enough comments!\n");
+      exit(0);
+    }
+
+    if(ans<.25){
+      printf("Too few comments!\n");
+      exit(3);
+    }
+    
+  } else
+    if (pid == 0){ /* child */
+      assert(dup2(pipefd[1], STDOUT_FILENO) != -1);
+      execlp("./count-comments.x", "count-comments.x", argv[1], NULL);
+      
+    }
+
+  
+  return 0;
+}
